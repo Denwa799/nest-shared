@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "denwa-nest-shared",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "./dist/src/main.js",
   "module": "./dist/src/main.js",
   "types": "./dist/main.d.ts",
