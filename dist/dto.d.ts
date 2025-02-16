@@ -60,3 +60,39 @@ export declare class BadGatewayDto {
     messages?: string[];
     error?: string;
 }
+export declare class TempImagesDto {
+    tempName: string;
+    altRU?: string;
+    altEN?: string;
+    altAR?: string;
+}
+export declare class AddTempImagesDto extends TempImagesDto {
+    id: string;
+}
+export declare class AllImagesDto {
+    name?: string;
+    tempName?: string;
+    altRU?: string;
+    altEN?: string;
+    altAR?: string;
+}
+export declare class PreparedImageDto {
+    name: string;
+    fileExtensions: string[];
+    originalFileExtension: string;
+    entityId: string;
+    fullPathExample: string;
+    altRU?: string;
+    altEN?: string;
+    altAR?: string;
+}
+export declare class InputPreparedImageDto {
+    name: string;
+    fileExtensions: string[];
+    originalFileExtension: string;
+    entityId: string;
+    fullPathExample: string;
+    altRU?: string;
+    altEN?: string;
+    altAR?: string;
+}
