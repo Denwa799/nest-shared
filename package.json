@@ -2,14 +2,22 @@
   "$schema": "https://json.schemastore.org/package.json",
   "name": "denwa-nest-shared",
   "version": "1.0.6",
-  "main": "./dist/src/main.js",
-  "module": "./dist/src/main.js",
-  "types": "./dist/main.d.ts",
+  "types": "./dist/index.d.ts",
+  "main": "./cjs/index.js",
+  "module": "./dist/index.js",
   "author": "Denwa",
   "type": "module",
   "private": false,
+  "files": [
+    "cjs",
+    "dist",
+    "CHANGELOG.md",
+    "README.md"
+  ],
   "scripts": {
-    "build": "swc src -d dist --delete-dir-on-start && tsc --emitDeclarationOnly --declaration --outDir dist",
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "rimraf ./dist && tsc -p tsconfig.build.json",
+    "build:cjs": "rimraf ./cjs && tsc -p tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > ./cjs/package.json",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" ",
     "prepare-push": "npm run lint && npm run format && npm run build",
@@ -26,16 +34,16 @@
   "exports": {
     ".": {
       "types": {
-        "import": "./dist/main.d.ts"
+        "import": "./dist/index.d.ts",
+        "require": "./cjs/index.d.ts"
       },
-      "import": "./dist/src/main.js"
+      "import": "./dist/index.js",
+      "require": "./cjs/index.js"
     }
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.20.0",
-    "@swc/cli": "^0.6.0",
-    "@swc/core": "^1.10.16",
     "@types/node": "^22.13.4",
     "@types/ws": "^8.5.14",
     "eslint": "^9.20.1",
@@ -43,6 +51,7 @@
     "eslint-plugin-prettier": "^5.2.3",
     "globals": "^15.15.0",
     "prettier": "^3.5.1",
+    "rimraf": "^6.0.1",
     "standard-version": "^9.5.0",
     "ts-morph": "^25.0.1",
     "tsconfig-paths": "^4.2.0",
