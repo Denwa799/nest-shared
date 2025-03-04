@@ -95,6 +95,7 @@ class ImageFileDto {
     entityId;
     fullPathExample;
     fileExtensions;
+    prefixes;
 }
 exports.ImageFileDto = ImageFileDto;
 __decorate([
@@ -123,6 +124,12 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], ImageFileDto.prototype, "fileExtensions", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '[original, 1280x720]', description: 'Префиксы файла' }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], ImageFileDto.prototype, "prefixes", void 0);
 let OkRequestDto = class OkRequestDto {
     statusCode;
     message;
@@ -402,6 +409,7 @@ exports.AllImagesDto = AllImagesDto = __decorate([
 let PreparedImageDto = class PreparedImageDto {
     name;
     fileExtensions;
+    prefixes;
     originalFileExtension;
     entityId;
     fullPathExample;
@@ -423,6 +431,12 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], PreparedImageDto.prototype, "fileExtensions", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '[original, 1280x720]', description: 'Префиксы файла' }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], PreparedImageDto.prototype, "prefixes", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'jpg', description: 'Расширение оригинального файла' }),
     (0, graphql_1.Field)(),
@@ -472,6 +486,7 @@ exports.PreparedImageDto = PreparedImageDto = __decorate([
 let InputPreparedImageDto = class InputPreparedImageDto {
     name;
     fileExtensions;
+    prefixes;
     originalFileExtension;
     entityId;
     fullPathExample;
@@ -493,6 +508,12 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], InputPreparedImageDto.prototype, "fileExtensions", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '[original, 1280x720]', description: 'Префиксы файла' }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], InputPreparedImageDto.prototype, "prefixes", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'jpg', description: 'Расширение оригинального файла' }),
     (0, graphql_1.Field)(),

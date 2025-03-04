@@ -15,6 +15,7 @@ export declare class ImageFileDto {
     entityId: string;
     fullPathExample: string;
     fileExtensions: string[];
+    prefixes: string[];
 }
 export declare class OkRequestDto {
     statusCode: 200;
@@ -79,6 +80,7 @@ export declare class AllImagesDto {
 export declare class PreparedImageDto {
     name: string;
     fileExtensions: string[];
+    prefixes: string[];
     originalFileExtension: string;
     entityId: string;
     fullPathExample: string;
@@ -89,6 +91,7 @@ export declare class PreparedImageDto {
 export declare class InputPreparedImageDto {
     name: string;
     fileExtensions: string[];
+    prefixes: string[];
     originalFileExtension: string;
     entityId: string;
     fullPathExample: string;

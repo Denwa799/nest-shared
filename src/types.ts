@@ -33,6 +33,7 @@ export type SortOrderType = 'asc' | 'desc' | 'ASC' | 'DESC';
 export interface IPreparedImage {
   name: string;
   fileExtensions: string[];
+  prefixes: string[];
   originalFileExtension: string;
   entityId: string;
   fullPathExample: string;

@@ -79,6 +79,11 @@ export class ImageFileDto {
   @IsArray()
   @IsString({ each: true })
   fileExtensions: string[];
+
+  @ApiProperty({ example: '[original, 1280x720]', description: 'Префиксы файла' })
+  @IsArray()
+  @IsString({ each: true })
+  prefixes: string[];
 }
 
 @ObjectType()
@@ -273,6 +278,11 @@ export class PreparedImageDto {
   @IsString({ each: true })
   fileExtensions: string[];
 
+  @ApiProperty({ example: '[original, 1280x720]', description: 'Префиксы файла' })
+  @IsArray()
+  @IsString({ each: true })
+  prefixes: string[];
+
   @ApiProperty({ example: 'jpg', description: 'Расширение оригинального файла' })
   @Field()
   @IsString()
@@ -323,6 +333,11 @@ export class InputPreparedImageDto {
   @IsArray()
   @IsString({ each: true })
   fileExtensions: string[];
+
+  @ApiProperty({ example: '[original, 1280x720]', description: 'Префиксы файла' })
+  @IsArray()
+  @IsString({ each: true })
+  prefixes: string[];
 
   @ApiProperty({ example: 'jpg', description: 'Расширение оригинального файла' })
   @Field()
