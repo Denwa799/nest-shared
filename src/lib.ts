@@ -67,13 +67,13 @@ export const getPaginateSkip = (page: number, limit: number): number => {
  * @return {string} Возвращает либо пустую строку, либо отформатированный номер телефона
  * @example
  * const phone = formatPhone(+79885054219)
- * phone === "+7 988 5054219"
+ * phone === "+79885054219"
  */
 export const formatPhone = (phone: string): string => {
   const parsedPhone = parsePhoneNumber(phone);
   if (!parsedPhone?.isValid()) return '';
 
-  return parsedPhone.formatInternational();
+  return parsedPhone.number;
 };
 
 /**
