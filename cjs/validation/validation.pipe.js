@@ -13,8 +13,9 @@ const class_validator_1 = require("class-validator");
 const validation_exception_1 = require("./validation.exception");
 let ValidationPipe = class ValidationPipe {
     async transform(value, metadata) {
-        if (!metadata.metatype)
+        if (!metadata.metatype || (value && typeof value === 'object' && 'fieldNodes' in value)) {
             return value;
+        }
         const obj = (0, class_transformer_1.plainToClass)(metadata.metatype, value);
         if (typeof obj !== 'object')
             return value;

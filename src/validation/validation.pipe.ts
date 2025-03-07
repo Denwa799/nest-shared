@@ -9,7 +9,9 @@ import { ValidationException } from './validation.exception';
 @Injectable()
 export class ValidationPipe implements PipeTransform<unknown> {
   async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
-    if (!metadata.metatype) return value;
+    if (!metadata.metatype || (value && typeof value === 'object' && 'fieldNodes' in value)) {
+      return value;
+    }
 
     const obj: object = plainToClass(metadata.metatype, value);
     if (typeof obj !== 'object') return value;

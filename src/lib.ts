@@ -8,10 +8,10 @@ import {
   LessThanOrEqual,
   MoreThanOrEqual,
 } from 'typeorm';
+import { ReadStream } from 'fs';
+import { GraphQLResolveInfo, SelectionNode } from 'graphql';
 
 import { IPaginate, QueryDataType } from './types';
-import { ReadStream } from 'fs';
-import { GraphQLResolveInfo } from 'graphql';
 
 /**
  * @description Отлов ошибки
@@ -397,14 +397,32 @@ export const createQueryData = <Entity>(
  * @param info - Объект с информацией запроса
  */
 export const extractGraphqlFields = (info: GraphQLResolveInfo): string[] => {
-  const fields = info.fieldNodes[0].selectionSet?.selections
-    .map((selection) => {
-      if (selection.kind === 'Field') {
-        return selection.name.value;
-      }
-      return null;
-    })
-    .filter((item) => !!item) as string[];
+  const processSelections = (
+    selections: readonly SelectionNode[],
+    parentPath: string = '',
+  ): string[] => {
+    const fields: string[] = [];
 
-  return fields ?? [];
+    selections.forEach((selection) => {
+      if (selection.kind === 'Field') {
+        const fieldName = selection.name.value;
+        const currentPath = parentPath ? `${parentPath}.${fieldName}` : fieldName;
+
+        fields.push(currentPath);
+
+        if (selection.selectionSet) {
+          fields.push(...processSelections(selection.selectionSet.selections, currentPath));
+        }
+      }
+    });
+
+    return fields;
+  };
+
+  const rootSelections = info.fieldNodes[0].selectionSet?.selections;
+  if (!rootSelections) {
+    return [];
+  }
+
+  return processSelections(rootSelections);
 };

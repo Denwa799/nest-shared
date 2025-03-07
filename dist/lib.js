@@ -282,15 +282,25 @@ const createQueryData = (page, limit, sortField, sortOrder, filterType, filter, 
 };
 exports.createQueryData = createQueryData;
 const extractGraphqlFields = (info) => {
-    const fields = info.fieldNodes[0].selectionSet?.selections
-        .map((selection) => {
-        if (selection.kind === 'Field') {
-            return selection.name.value;
-        }
-        return null;
-    })
-        .filter((item) => !!item);
-    return fields ?? [];
+    const processSelections = (selections, parentPath = '') => {
+        const fields = [];
+        selections.forEach((selection) => {
+            if (selection.kind === 'Field') {
+                const fieldName = selection.name.value;
+                const currentPath = parentPath ? `${parentPath}.${fieldName}` : fieldName;
+                fields.push(currentPath);
+                if (selection.selectionSet) {
+                    fields.push(...processSelections(selection.selectionSet.selections, currentPath));
+                }
+            }
+        });
+        return fields;
+    };
+    const rootSelections = info.fieldNodes[0].selectionSet?.selections;
+    if (!rootSelections) {
+        return [];
+    }
+    return processSelections(rootSelections);
 };
 exports.extractGraphqlFields = extractGraphqlFields;
 //# sourceMappingURL=lib.js.map

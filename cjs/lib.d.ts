@@ -1,6 +1,6 @@
-import { IPaginate, QueryDataType } from './types';
 import { ReadStream } from 'fs';
 import { GraphQLResolveInfo } from 'graphql';
+import { IPaginate, QueryDataType } from './types';
 export declare const getError: ({ error, message }: {
     error?: unknown;
     message?: string;
