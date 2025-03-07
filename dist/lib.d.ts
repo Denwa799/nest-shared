@@ -1,5 +1,6 @@
 import { IPaginate, QueryDataType } from './types';
 import { ReadStream } from 'fs';
+import { GraphQLResolveInfo } from 'graphql';
 export declare const getError: ({ error, message }: {
     error?: unknown;
     message?: string;
@@ -14,3 +15,4 @@ export declare const checkPageAndLimit: (page: number, limit: number, maxLimit?:
 };
 export declare const fileStreamToBuffer: (fileStream: ReadStream) => Promise<Buffer>;
 export declare const createQueryData: <Entity>(page: number, limit: number, sortField: string, sortOrder: string, filterType: string, filter?: object, search?: object) => QueryDataType<Entity>;
+export declare const extractGraphqlFields: (info: GraphQLResolveInfo) => string[];

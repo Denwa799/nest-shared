@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createQueryData = exports.fileStreamToBuffer = exports.checkPageAndLimit = exports.concatenateTwo32BitNumbers = exports.formatPhone = exports.getPaginateSkip = exports.createPaginate = exports.getError = void 0;
+exports.extractGraphqlFields = exports.createQueryData = exports.fileStreamToBuffer = exports.checkPageAndLimit = exports.concatenateTwo32BitNumbers = exports.formatPhone = exports.getPaginateSkip = exports.createPaginate = exports.getError = void 0;
 const libphonenumber_js_1 = require("libphonenumber-js");
 const typeorm_1 = require("typeorm");
 const getError = ({ error, message }) => {
@@ -31,7 +31,7 @@ const formatPhone = (phone) => {
     const parsedPhone = (0, libphonenumber_js_1.default)(phone);
     if (!parsedPhone?.isValid())
         return '';
-    return parsedPhone.formatInternational();
+    return parsedPhone.number;
 };
 exports.formatPhone = formatPhone;
 const concatenateTwo32BitNumbers = (low, high) => {
@@ -281,4 +281,16 @@ const createQueryData = (page, limit, sortField, sortOrder, filterType, filter, 
     return queryData;
 };
 exports.createQueryData = createQueryData;
+const extractGraphqlFields = (info) => {
+    const fields = info.fieldNodes[0].selectionSet?.selections
+        .map((selection) => {
+        if (selection.kind === 'Field') {
+            return selection.name.value;
+        }
+        return null;
+    })
+        .filter((item) => !!item);
+    return fields ?? [];
+};
+exports.extractGraphqlFields = extractGraphqlFields;
 //# sourceMappingURL=lib.js.map

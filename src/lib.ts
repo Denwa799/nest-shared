@@ -11,6 +11,7 @@ import {
 
 import { IPaginate, QueryDataType } from './types';
 import { ReadStream } from 'fs';
+import { GraphQLResolveInfo } from 'graphql';
 
 /**
  * @description Отлов ошибки
@@ -389,4 +390,21 @@ export const createQueryData = <Entity>(
   }
 
   return queryData;
+};
+
+/**
+ * @description Получить список запрашиваемых полей
+ * @param info - Объект с информацией запроса
+ */
+export const extractGraphqlFields = (info: GraphQLResolveInfo): string[] => {
+  const fields = info.fieldNodes[0].selectionSet?.selections
+    .map((selection) => {
+      if (selection.kind === 'Field') {
+        return selection.name.value;
+      }
+      return null;
+    })
+    .filter((item) => !!item) as string[];
+
+  return fields ?? [];
 };
