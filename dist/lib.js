@@ -307,16 +307,17 @@ exports.extractGraphqlFields = extractGraphqlFields;
 const prepareTempImages = (files, tempImages) => {
     const images = files
         .map((item) => {
-        const { imageName, originalFileExtension, fileExtensions, entityId, fullPathExample } = item;
+        const { imageName, originalFileExtension, fileExtensions, prefixes, entityId, fullPathExample, } = item;
         const finded = tempImages.find((tempImage) => tempImage.tempName === `${imageName}.${originalFileExtension}`);
         if (!finded)
             return null;
         return {
             name: imageName,
-            fileExtensions: fileExtensions,
-            originalFileExtension: originalFileExtension,
-            entityId: entityId,
-            fullPathExample: fullPathExample,
+            fileExtensions,
+            prefixes,
+            originalFileExtension,
+            entityId,
+            fullPathExample,
             altRU: finded.altRU,
             altEN: finded.altEN,
             altAR: finded.altAR,
