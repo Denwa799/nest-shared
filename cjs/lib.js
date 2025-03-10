@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractGraphqlFields = exports.createQueryData = exports.fileStreamToBuffer = exports.checkPageAndLimit = exports.concatenateTwo32BitNumbers = exports.formatPhone = exports.getPaginateSkip = exports.createPaginate = exports.getError = void 0;
+exports.updateEntityImages = exports.getTempImagesInAllImages = exports.prepareTempImages = exports.extractGraphqlFields = exports.createQueryData = exports.fileStreamToBuffer = exports.checkPageAndLimit = exports.concatenateTwo32BitNumbers = exports.formatPhone = exports.getPaginateSkip = exports.createPaginate = exports.getError = void 0;
 const libphonenumber_js_1 = require("libphonenumber-js");
 const typeorm_1 = require("typeorm");
+const zod_1 = require("zod");
 const getError = ({ error, message }) => {
     if (error)
         console.error(error);
@@ -303,4 +304,143 @@ const extractGraphqlFields = (info) => {
     return processSelections(rootSelections);
 };
 exports.extractGraphqlFields = extractGraphqlFields;
+const prepareTempImages = (files, tempImages) => {
+    const images = files
+        .map((item) => {
+        const { imageName, originalFileExtension, fileExtensions, entityId, fullPathExample } = item;
+        const finded = tempImages.find((tempImage) => tempImage.tempName === `${imageName}.${originalFileExtension}`);
+        if (!finded)
+            return null;
+        return {
+            name: imageName,
+            fileExtensions: fileExtensions,
+            originalFileExtension: originalFileExtension,
+            entityId: entityId,
+            fullPathExample: fullPathExample,
+            altRU: finded.altRU,
+            altEN: finded.altEN,
+            altAR: finded.altAR,
+        };
+    })
+        .filter((item) => item !== null);
+    return images;
+};
+exports.prepareTempImages = prepareTempImages;
+const getTempImagesInAllImages = (allImages) => {
+    if (!allImages)
+        return [];
+    const tempImages = allImages
+        .map((item) => {
+        if (!item.tempName)
+            return null;
+        return {
+            tempName: item.tempName,
+            altRU: item.altRU,
+            altEN: item.altEN,
+            altAR: item.altAR,
+        };
+    })
+        .filter((item) => item !== null);
+    return tempImages;
+};
+exports.getTempImagesInAllImages = getTempImagesInAllImages;
+const updateEntityImages = (entityImages, allImages, preparedTempImages) => {
+    if ((!entityImages && !preparedTempImages.length) || !allImages) {
+        return {
+            newImages: null,
+            deletedImages: null,
+        };
+    }
+    let correctedImages = [];
+    const deletedImages = [];
+    const allImagesAndOrders = allImages.map((item, index) => {
+        return {
+            ...item,
+            order: index,
+        };
+    });
+    if (entityImages) {
+        const images = JSON.parse(entityImages);
+        const schema = zod_1.z.object({
+            name: zod_1.z.string(),
+            fileExtensions: zod_1.z.string().array(),
+            prefixes: zod_1.z.string().array(),
+            originalFileExtension: zod_1.z.string(),
+            altRU: zod_1.z.string().optional().nullable(),
+            altEN: zod_1.z.string().optional().nullable(),
+            altAR: zod_1.z.string().optional().nullable(),
+        });
+        if (!Array.isArray(images)) {
+            return {
+                newImages: null,
+                deletedImages: null,
+            };
+        }
+        correctedImages = images
+            .map((item) => {
+            try {
+                schema.parse(item);
+            }
+            catch {
+                return null;
+            }
+            const finded = allImagesAndOrders.find((element) => element.name === item.name);
+            if (!finded) {
+                deletedImages.push({
+                    imageName: item.name,
+                    fileExtensions: item.fileExtensions,
+                    prefixes: item.prefixes,
+                    entityId: item.entityId,
+                    fullPathExample: item.fullPathExample,
+                    originalFileExtension: item.originalFileExtension,
+                });
+                return null;
+            }
+            return {
+                name: item.name,
+                fileExtensions: item.fileExtensions,
+                prefixes: item.prefixes,
+                originalFileExtension: item.originalFileExtension,
+                entityId: item.entityId,
+                fullPathExample: item.fullPathExample,
+                altRU: finded.altRU,
+                altEN: finded.altEN,
+                altAR: finded.altAR,
+                order: finded.order,
+            };
+        })
+            .filter((item) => item !== null);
+    }
+    const preparedTempImagesAndOrder = preparedTempImages
+        .map((item) => {
+        const finded = allImagesAndOrders.find((element) => element.tempName === `${item.name}.${item.originalFileExtension}`);
+        if (!finded)
+            return null;
+        return {
+            ...item,
+            order: finded.order,
+        };
+    })
+        .filter((item) => item !== null);
+    const newImages = [...correctedImages, ...preparedTempImagesAndOrder]
+        .sort((a, b) => a.order - b.order)
+        .map((item) => {
+        return {
+            name: item.name,
+            fileExtensions: item.fileExtensions,
+            prefixes: item.prefixes,
+            originalFileExtension: item.originalFileExtension,
+            entityId: item.entityId,
+            fullPathExample: item.fullPathExample,
+            altRU: item.altRU,
+            altEN: item.altEN,
+            altAR: item.altAR,
+        };
+    });
+    return {
+        newImages: newImages.length ? newImages : null,
+        deletedImages: deletedImages.length ? deletedImages : null,
+    };
+};
+exports.updateEntityImages = updateEntityImages;
 //# sourceMappingURL=lib.js.map

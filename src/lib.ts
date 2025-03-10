@@ -11,7 +11,9 @@ import {
 import { ReadStream } from 'fs';
 import { GraphQLResolveInfo, SelectionNode } from 'graphql';
 
-import { IPaginate, QueryDataType } from './types';
+import { IPaginate, IPreparedImage, IPreparedImageAndOrder, QueryDataType } from './types';
+import { AllImagesDto, ImageFileDto, TempImagesDto } from './dto';
+import { z } from 'zod';
 
 /**
  * @description Отлов ошибки
@@ -425,4 +427,192 @@ export const extractGraphqlFields = (info: GraphQLResolveInfo): string[] => {
   }
 
   return processSelections(rootSelections);
+};
+
+/**
+ * @description Связывает файлы из микросервиса с полями alt и sourceUrl
+ * @param {FilesDto[]} files - файлы от микросервиса
+ * @param {TempImagesDto[]} tempImages - исходный массив, на основе которого делался запрос
+ * @return {IPreparedImage[]} Взвращает объект с информацией о файлах
+ */
+export const prepareTempImages = (
+  files: ImageFileDto[],
+  tempImages: TempImagesDto[],
+): IPreparedImage[] => {
+  const images = files
+    .map((item) => {
+      const { imageName, originalFileExtension, fileExtensions, entityId, fullPathExample } = item;
+
+      const finded = tempImages.find(
+        (tempImage) => tempImage.tempName === `${imageName}.${originalFileExtension}`,
+      );
+
+      if (!finded) return null;
+
+      return {
+        name: imageName,
+        fileExtensions: fileExtensions,
+        originalFileExtension: originalFileExtension,
+        entityId: entityId,
+        fullPathExample: fullPathExample,
+        altRU: finded.altRU,
+        altEN: finded.altEN,
+        altAR: finded.altAR,
+      };
+    })
+    .filter((item) => item !== null) as IPreparedImage[];
+
+  return images;
+};
+
+/**
+ * @description Достает tempImages и массива со всеми картинками объекта
+ * @param {AllImagesDto[]} allImages - массив всех изображений
+ * @return {TempImagesDto[]} Взвращает объект с информацией о файлах
+ */
+export const getTempImagesInAllImages = (
+  allImages: AllImagesDto[] | undefined,
+): TempImagesDto[] => {
+  if (!allImages) return [];
+
+  const tempImages = allImages
+    .map((item) => {
+      if (!item.tempName) return null;
+
+      return {
+        tempName: item.tempName,
+        altRU: item.altRU,
+        altEN: item.altEN,
+        altAR: item.altAR,
+      };
+    })
+    .filter((item) => item !== null) as TempImagesDto[];
+
+  return tempImages;
+};
+
+/**
+ * @description Обновляет изображения в сущности
+ * @param {string} entityImages - текущие изображения
+ * @param {AllImagesDto[]} allImages - изображения что пришли от клиента
+ * @param {IPreparedImage[]} preparedTempImages - заранее подготовленные новые изображения
+ * @return {object} Взвращает объект с информацией о новых файлах и удаленных
+ */
+export const updateEntityImages = (
+  entityImages: string | null,
+  allImages: AllImagesDto[] | undefined,
+  preparedTempImages: IPreparedImage[],
+): {
+  newImages: IPreparedImage[] | null;
+  deletedImages: ImageFileDto[] | null;
+} => {
+  if ((!entityImages && !preparedTempImages.length) || !allImages) {
+    return {
+      newImages: null,
+      deletedImages: null,
+    };
+  }
+
+  let correctedImages: IPreparedImageAndOrder[] = [];
+  const deletedImages: ImageFileDto[] = [];
+
+  const allImagesAndOrders = allImages.map((item, index) => {
+    return {
+      ...item,
+      order: index,
+    };
+  });
+
+  if (entityImages) {
+    const images = JSON.parse(entityImages) as IPreparedImage[];
+    const schema = z.object({
+      name: z.string(),
+      fileExtensions: z.string().array(),
+      prefixes: z.string().array(),
+      originalFileExtension: z.string(),
+      altRU: z.string().optional().nullable(),
+      altEN: z.string().optional().nullable(),
+      altAR: z.string().optional().nullable(),
+    });
+
+    if (!Array.isArray(images)) {
+      return {
+        newImages: null,
+        deletedImages: null,
+      };
+    }
+
+    correctedImages = images
+      .map((item) => {
+        try {
+          schema.parse(item);
+        } catch {
+          return null;
+        }
+
+        const finded = allImagesAndOrders.find((element) => element.name === item.name);
+
+        if (!finded) {
+          deletedImages.push({
+            imageName: item.name,
+            fileExtensions: item.fileExtensions,
+            prefixes: item.prefixes,
+            entityId: item.entityId,
+            fullPathExample: item.fullPathExample,
+            originalFileExtension: item.originalFileExtension,
+          });
+          return null;
+        }
+
+        return {
+          name: item.name,
+          fileExtensions: item.fileExtensions,
+          prefixes: item.prefixes,
+          originalFileExtension: item.originalFileExtension,
+          entityId: item.entityId,
+          fullPathExample: item.fullPathExample,
+          altRU: finded.altRU,
+          altEN: finded.altEN,
+          altAR: finded.altAR,
+          order: finded.order,
+        };
+      })
+      .filter((item) => item !== null) as IPreparedImageAndOrder[];
+  }
+
+  const preparedTempImagesAndOrder = preparedTempImages
+    .map((item) => {
+      const finded = allImagesAndOrders.find(
+        (element) => element.tempName === `${item.name}.${item.originalFileExtension}`,
+      );
+
+      if (!finded) return null;
+
+      return {
+        ...item,
+        order: finded.order,
+      };
+    })
+    .filter((item) => item !== null) as IPreparedImageAndOrder[];
+
+  const newImages = [...correctedImages, ...preparedTempImagesAndOrder]
+    .sort((a, b) => a.order - b.order)
+    .map((item) => {
+      return {
+        name: item.name,
+        fileExtensions: item.fileExtensions,
+        prefixes: item.prefixes,
+        originalFileExtension: item.originalFileExtension,
+        entityId: item.entityId,
+        fullPathExample: item.fullPathExample,
+        altRU: item.altRU,
+        altEN: item.altEN,
+        altAR: item.altAR,
+      };
+    });
+
+  return {
+    newImages: newImages.length ? newImages : null,
+    deletedImages: deletedImages.length ? deletedImages : null,
+  };
 };
