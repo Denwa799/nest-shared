@@ -18,7 +18,7 @@ const ApiProperty = ({ type, enumObject, min, max, example, description, isOptio
     }
     switch (type) {
         case 'int':
-            decorators.push((0, graphql_1.Field)(() => graphql_1.Int, { nullable: isOptional }));
+            decorators.push((0, graphql_1.Field)(() => (isArray ? [graphql_1.Int] : graphql_1.Int), { nullable: isOptional }));
             if (isOptional)
                 decorators.push((0, class_validator_1.IsOptional)());
             if (isArray)
@@ -30,7 +30,7 @@ const ApiProperty = ({ type, enumObject, min, max, example, description, isOptio
                 decorators.push((0, class_validator_1.Max)(max, { each: isArray }));
             break;
         case 'float':
-            decorators.push((0, graphql_1.Field)(() => graphql_1.Float, { nullable: isOptional }));
+            decorators.push((0, graphql_1.Field)(() => (isArray ? [graphql_1.Float] : graphql_1.Float), { nullable: isOptional }));
             if (isOptional)
                 decorators.push((0, class_validator_1.IsOptional)());
             if (isArray)
@@ -42,7 +42,7 @@ const ApiProperty = ({ type, enumObject, min, max, example, description, isOptio
                 decorators.push((0, class_validator_1.Max)(max, { each: isArray }));
             break;
         case 'date':
-            decorators.push((0, graphql_1.Field)(() => Date, { nullable: isOptional }));
+            decorators.push((0, graphql_1.Field)(() => (isArray ? [Date] : Date), { nullable: isOptional }));
             if (isOptional)
                 decorators.push((0, class_validator_1.IsOptional)());
             if (isArray)
@@ -57,7 +57,7 @@ const ApiProperty = ({ type, enumObject, min, max, example, description, isOptio
             break;
         case 'string':
         default:
-            decorators.push((0, graphql_1.Field)(() => String, { nullable: isOptional }));
+            decorators.push((0, graphql_1.Field)(() => (isArray ? [String] : String), { nullable: isOptional }));
             if (isOptional)
                 decorators.push((0, class_validator_1.IsOptional)());
             if (isArray)

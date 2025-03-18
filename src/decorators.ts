@@ -69,7 +69,7 @@ export const ApiProperty = ({
 
   switch (type) {
     case 'int':
-      decorators.push(Field(() => Int, { nullable: isOptional }));
+      decorators.push(Field(() => (isArray ? [Int] : Int), { nullable: isOptional }));
 
       if (isOptional) decorators.push(IsOptional());
       if (isArray) decorators.push(IsArray());
@@ -81,7 +81,7 @@ export const ApiProperty = ({
 
       break;
     case 'float':
-      decorators.push(Field(() => Float, { nullable: isOptional }));
+      decorators.push(Field(() => (isArray ? [Float] : Float), { nullable: isOptional }));
 
       if (isOptional) decorators.push(IsOptional());
       if (isArray) decorators.push(IsArray());
@@ -93,7 +93,7 @@ export const ApiProperty = ({
 
       break;
     case 'date':
-      decorators.push(Field(() => Date, { nullable: isOptional }));
+      decorators.push(Field(() => (isArray ? [Date] : Date), { nullable: isOptional }));
 
       if (isOptional) decorators.push(IsOptional());
       if (isArray) decorators.push(IsArray());
@@ -107,7 +107,7 @@ export const ApiProperty = ({
       break;
     case 'string':
     default:
-      decorators.push(Field(() => String, { nullable: isOptional }));
+      decorators.push(Field(() => (isArray ? [String] : String), { nullable: isOptional }));
 
       if (isOptional) decorators.push(IsOptional());
       if (isArray) decorators.push(IsArray());
