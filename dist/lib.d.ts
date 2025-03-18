@@ -23,3 +23,5 @@ export declare const updateEntityImages: (entityImages: string | null, allImages
     newImages: IPreparedImage[] | null;
     deletedImages: ImageFileDto[] | null;
 };
+export declare const translit: (word: string, isTrim?: boolean) => string;
+export declare const checkTranslit: (string: string) => boolean;

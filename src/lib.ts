@@ -624,3 +624,74 @@ export const updateEntityImages = (
     deletedImages: deletedImages.length ? deletedImages : null,
   };
 };
+
+/**
+ * @description Конвертация текста с русского в транслит
+ * @param {string} word - Строка
+ * @param {boolean} isTrim - Убирать ли тире в начале и конце
+ * @return {string} Возвращает строку в транслите
+ */
+export const translit = (word: string, isTrim = true): string => {
+  const converter = {
+    а: 'a',
+    б: 'b',
+    в: 'v',
+    г: 'g',
+    д: 'd',
+    е: 'e',
+    ё: 'e',
+    ж: 'zh',
+    з: 'z',
+    и: 'i',
+    й: 'y',
+    к: 'k',
+    л: 'l',
+    м: 'm',
+    н: 'n',
+    о: 'o',
+    п: 'p',
+    р: 'r',
+    с: 's',
+    т: 't',
+    у: 'u',
+    ф: 'f',
+    х: 'h',
+    ц: 'c',
+    ч: 'ch',
+    ш: 'sh',
+    щ: 'sch',
+    ь: '',
+    ы: 'y',
+    ъ: '',
+    э: 'e',
+    ю: 'yu',
+    я: 'ya',
+  };
+
+  word = word.toLowerCase();
+
+  let answer = '';
+  for (let i = 0; i < word.length; ++i) {
+    if (converter[word[i] as keyof typeof converter] == undefined) {
+      answer += word[i];
+    } else {
+      answer += converter[word[i] as keyof typeof converter];
+    }
+  }
+
+  answer = answer.replace(/[^-0-9a-z]/g, '-');
+  answer = answer.replace(/[-]+/g, '-');
+  if (isTrim) answer = answer.replace(/^\\-|-$/g, '');
+
+  return answer;
+};
+
+/**
+ * @description Проверка валидности ЧПУ строки
+ * @param {string} string - Строка
+ * @return {boolean} Возвращает true/false
+ */
+export const checkTranslit = (string: string): boolean => {
+  const cpuRegex = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+  return cpuRegex.test(string);
+};

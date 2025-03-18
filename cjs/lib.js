@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateEntityImages = exports.getTempImagesInAllImages = exports.prepareTempImages = exports.extractGraphqlFields = exports.createQueryData = exports.fileStreamToBuffer = exports.checkPageAndLimit = exports.concatenateTwo32BitNumbers = exports.formatPhone = exports.getPaginateSkip = exports.createPaginate = exports.getError = void 0;
+exports.checkTranslit = exports.translit = exports.updateEntityImages = exports.getTempImagesInAllImages = exports.prepareTempImages = exports.extractGraphqlFields = exports.createQueryData = exports.fileStreamToBuffer = exports.checkPageAndLimit = exports.concatenateTwo32BitNumbers = exports.formatPhone = exports.getPaginateSkip = exports.createPaginate = exports.getError = void 0;
 const libphonenumber_js_1 = require("libphonenumber-js");
 const typeorm_1 = require("typeorm");
 const zod_1 = require("zod");
@@ -444,4 +444,62 @@ const updateEntityImages = (entityImages, allImages, preparedTempImages) => {
     };
 };
 exports.updateEntityImages = updateEntityImages;
+const translit = (word, isTrim = true) => {
+    const converter = {
+        а: 'a',
+        б: 'b',
+        в: 'v',
+        г: 'g',
+        д: 'd',
+        е: 'e',
+        ё: 'e',
+        ж: 'zh',
+        з: 'z',
+        и: 'i',
+        й: 'y',
+        к: 'k',
+        л: 'l',
+        м: 'm',
+        н: 'n',
+        о: 'o',
+        п: 'p',
+        р: 'r',
+        с: 's',
+        т: 't',
+        у: 'u',
+        ф: 'f',
+        х: 'h',
+        ц: 'c',
+        ч: 'ch',
+        ш: 'sh',
+        щ: 'sch',
+        ь: '',
+        ы: 'y',
+        ъ: '',
+        э: 'e',
+        ю: 'yu',
+        я: 'ya',
+    };
+    word = word.toLowerCase();
+    let answer = '';
+    for (let i = 0; i < word.length; ++i) {
+        if (converter[word[i]] == undefined) {
+            answer += word[i];
+        }
+        else {
+            answer += converter[word[i]];
+        }
+    }
+    answer = answer.replace(/[^-0-9a-z]/g, '-');
+    answer = answer.replace(/[-]+/g, '-');
+    if (isTrim)
+        answer = answer.replace(/^\\-|-$/g, '');
+    return answer;
+};
+exports.translit = translit;
+const checkTranslit = (string) => {
+    const cpuRegex = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+    return cpuRegex.test(string);
+};
+exports.checkTranslit = checkTranslit;
 //# sourceMappingURL=lib.js.map
