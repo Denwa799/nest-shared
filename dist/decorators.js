@@ -57,7 +57,12 @@ const ApiProperty = ({ type, enumObject, min, max, example, description, isOptio
             break;
         case 'string':
         default:
-            decorators.push((0, graphql_1.Field)(() => (isArray ? [String] : String), { nullable: isOptional }));
+            if (enumObject) {
+                decorators.push((0, graphql_1.Field)(() => (isArray ? [enumObject] : enumObject), { nullable: isOptional }));
+            }
+            else {
+                decorators.push((0, graphql_1.Field)(() => (isArray ? [String] : String), { nullable: isOptional }));
+            }
             if (isOptional)
                 decorators.push((0, class_validator_1.IsOptional)());
             if (isArray)

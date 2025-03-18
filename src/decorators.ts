@@ -107,7 +107,13 @@ export const ApiProperty = ({
       break;
     case 'string':
     default:
-      decorators.push(Field(() => (isArray ? [String] : String), { nullable: isOptional }));
+      if (enumObject) {
+        decorators.push(
+          Field(() => (isArray ? [enumObject] : enumObject), { nullable: isOptional }),
+        );
+      } else {
+        decorators.push(Field(() => (isArray ? [String] : String), { nullable: isOptional }));
+      }
 
       if (isOptional) decorators.push(IsOptional());
       if (isArray) decorators.push(IsArray());
