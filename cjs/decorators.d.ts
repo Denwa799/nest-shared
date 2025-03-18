@@ -1,15 +1,26 @@
-export declare const ApiProperty: ({ type, enumObject, min, max, example, description, isOptional, isUUID, isArray, isJson, isUrl, isPositive, isNegative, }: {
+export declare const ApiProperty: ({ type, enumObject, min, max, arrayMinSize, arrayMaxSize, example, description, isOptional, isUUID, isArray, isJson, isJWT, isUrl, isPositive, isNegative, isEmail, isMobilePhone, isPhoneNumber, isLatitude, isLongitude, isStrongPassword, isArrayNotEmpty, isArrayUnique, }: {
     type: "string" | "int" | "float" | "date" | "boolean";
     enumObject?: object;
     min?: number;
     max?: number;
+    arrayMinSize?: number;
+    arrayMaxSize?: number;
     example?: string;
     description?: string;
     isOptional?: boolean;
     isUUID?: boolean;
     isArray?: boolean;
     isJson?: boolean;
+    isJWT?: boolean;
     isUrl?: boolean;
     isPositive?: boolean;
     isNegative?: boolean;
+    isEmail?: boolean;
+    isMobilePhone?: boolean;
+    isPhoneNumber?: boolean;
+    isLatitude?: boolean;
+    isLongitude?: boolean;
+    isStrongPassword?: boolean;
+    isArrayNotEmpty?: boolean;
+    isArrayUnique?: boolean;
 }) => (<TFunction extends Function, Y>(target: TFunction | object, propertyKey?: string | symbol, descriptor?: TypedPropertyDescriptor<Y>) => void);
