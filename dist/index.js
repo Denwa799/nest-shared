@@ -19,4 +19,5 @@ __exportStar(require("./lib"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./const"), exports);
 __exportStar(require("./validation"), exports);
+__exportStar(require("./decorators"), exports);
 //# sourceMappingURL=index.js.map
