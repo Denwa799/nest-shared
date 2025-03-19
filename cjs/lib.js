@@ -64,7 +64,7 @@ const fileStreamToBuffer = async (fileStream) => {
     return Buffer.concat(chunks);
 };
 exports.fileStreamToBuffer = fileStreamToBuffer;
-const createQueryData = (page, limit, sortField, sortOrder, filterType, filter, search) => {
+const createQueryData = ({ page, limit, sortField, sortOrder, filterType, filter, search, fromToFields, oneEntryArrayFields, }) => {
     const queryData = {
         skip: (0, exports.getPaginateSkip)(page, limit),
         take: limit,
@@ -77,14 +77,7 @@ const createQueryData = (page, limit, sortField, sortOrder, filterType, filter, 
     if (filter) {
         let whereAnd = {};
         let whereOr = [];
-        let priceFrom;
-        let priceTo;
-        let priorityFrom;
-        let priorityTo;
-        let createdAtFrom;
-        let createdAtTo;
-        let updatedAtFrom;
-        let updatedAtTo;
+        const fromToMap = new Map();
         for (const [key, value] of Object.entries(filter)) {
             let currentKey = key;
             let currentValue;
@@ -102,41 +95,41 @@ const createQueryData = (page, limit, sortField, sortOrder, filterType, filter, 
                 currentValue = value;
             }
             else {
-                if (key === 'priceFrom') {
-                    priceFrom = value;
-                    continue;
+                if (fromToFields) {
+                    fromToFields.find((item) => {
+                        let fromKey = '';
+                        let toKey = '';
+                        if (item.fromFieldName === key)
+                            fromKey = key;
+                        else if (item.toFieldName === key)
+                            toKey = key;
+                        if (!fromKey || !toKey)
+                            return false;
+                        const mapValue = fromToMap.get(item.originalFieldName);
+                        if (mapValue) {
+                            fromToMap.set(item.originalFieldName, {
+                                fromFieldName: mapValue.fromFieldName ? mapValue.fromFieldName : fromKey,
+                                fromFieldValue: mapValue.fromFieldValue
+                                    ? mapValue.fromFieldValue
+                                    : fromKey
+                                        ? value
+                                        : null,
+                                toFieldName: mapValue.toFieldName ? mapValue.toFieldName : toKey,
+                                toFieldValue: mapValue.toFieldValue ? mapValue.toFieldValue : toKey ? value : null,
+                            });
+                            return true;
+                        }
+                        fromToMap.set(item.originalFieldName, {
+                            fromFieldName: fromKey,
+                            fromFieldValue: fromKey ? value : null,
+                            toFieldName: toKey,
+                            toFieldValue: toKey ? value : null,
+                        });
+                        return true;
+                    });
                 }
-                if (key === 'priceTo') {
-                    priceTo = value;
-                    continue;
-                }
-                if (key === 'priorityFrom') {
-                    priorityFrom = value;
-                    continue;
-                }
-                if (key === 'priorityTo') {
-                    priorityTo = value;
-                    continue;
-                }
-                if (key === 'createdAtFrom') {
-                    createdAtFrom = value;
-                    continue;
-                }
-                if (key === 'createdAtTo') {
-                    createdAtTo = value;
-                    continue;
-                }
-                if (key === 'updatedAtFrom') {
-                    updatedAtFrom = value;
-                    continue;
-                }
-                if (key === 'updatedAtTo') {
-                    updatedAtTo = value;
-                    continue;
-                }
-                if (Array.isArray(value) && value.length) {
-                    const arraysFields = [{ key: 'sectionsOR', originalKey: 'sections' }];
-                    const finded = arraysFields.find((item) => item.key === key);
+                if (Array.isArray(value) && value.length && oneEntryArrayFields) {
+                    const finded = oneEntryArrayFields.find((item) => item.key === key);
                     if (finded) {
                         currentValue = (0, typeorm_1.ArrayOverlap)(value);
                         currentKey = finded.originalKey;
@@ -162,103 +155,32 @@ const createQueryData = (page, limit, sortField, sortOrder, filterType, filter, 
                 ];
             }
         }
-        if (priceFrom && priceTo) {
-            whereAnd = {
-                ...whereAnd,
-                price: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(priceFrom), (0, typeorm_1.LessThanOrEqual)(priceTo)),
-            };
-            whereOr = [...whereOr, { price: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(priceFrom), (0, typeorm_1.LessThanOrEqual)(priceTo)) }];
-        }
-        else if (priceFrom) {
-            whereAnd = {
-                ...whereAnd,
-                price: (0, typeorm_1.MoreThanOrEqual)(priceFrom),
-            };
-            whereOr = [...whereOr, { price: (0, typeorm_1.MoreThanOrEqual)(priceFrom) }];
-        }
-        else if (priceTo) {
-            whereAnd = {
-                ...whereAnd,
-                price: (0, typeorm_1.LessThanOrEqual)(priceTo),
-            };
-            whereOr = [...whereOr, { price: (0, typeorm_1.LessThanOrEqual)(priceTo) }];
-        }
-        if (priorityFrom && priorityTo) {
-            whereAnd = {
-                ...whereAnd,
-                priority: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(priorityFrom), (0, typeorm_1.LessThanOrEqual)(priorityTo)),
-            };
-            whereOr = [
-                ...whereOr,
-                { priority: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(priorityFrom), (0, typeorm_1.LessThanOrEqual)(priorityTo)) },
-            ];
-        }
-        else if (priorityFrom) {
-            whereAnd = {
-                ...whereAnd,
-                priority: (0, typeorm_1.MoreThanOrEqual)(priorityFrom),
-            };
-            whereOr = [...whereOr, { priority: (0, typeorm_1.MoreThanOrEqual)(priorityFrom) }];
-        }
-        else if (priorityTo) {
-            whereAnd = {
-                ...whereAnd,
-                priority: (0, typeorm_1.LessThanOrEqual)(priorityTo),
-            };
-            whereOr = [...whereOr, { priority: (0, typeorm_1.LessThanOrEqual)(priorityTo) }];
-        }
-        if (createdAtFrom && createdAtTo) {
-            whereAnd = {
-                ...whereAnd,
-                createdAt: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(createdAtFrom), (0, typeorm_1.LessThanOrEqual)(createdAtTo)),
-            };
-            whereOr = [
-                ...whereOr,
-                {
-                    createdAt: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(createdAtFrom), (0, typeorm_1.LessThanOrEqual)(createdAtTo)),
-                },
-            ];
-        }
-        else if (createdAtFrom) {
-            whereAnd = {
-                ...whereAnd,
-                createdAt: (0, typeorm_1.MoreThanOrEqual)(createdAtFrom),
-            };
-            whereOr = [...whereOr, { createdAt: (0, typeorm_1.MoreThanOrEqual)(createdAtFrom) }];
-        }
-        else if (createdAtTo) {
-            whereAnd = {
-                ...whereAnd,
-                createdAt: (0, typeorm_1.LessThanOrEqual)(createdAtTo),
-            };
-            whereOr = [...whereOr, { createdAt: (0, typeorm_1.LessThanOrEqual)(createdAtTo) }];
-        }
-        if (updatedAtFrom && updatedAtTo) {
-            whereAnd = {
-                ...whereAnd,
-                updatedAt: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(updatedAtFrom), (0, typeorm_1.LessThanOrEqual)(updatedAtTo)),
-            };
-            whereOr = [
-                ...whereOr,
-                {
-                    updatedAt: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(updatedAtFrom), (0, typeorm_1.LessThanOrEqual)(updatedAtTo)),
-                },
-            ];
-        }
-        else if (updatedAtFrom) {
-            whereAnd = {
-                ...whereAnd,
-                updatedAt: (0, typeorm_1.MoreThanOrEqual)(updatedAtFrom),
-            };
-            whereOr = [...whereOr, { updatedAt: (0, typeorm_1.MoreThanOrEqual)(updatedAtFrom) }];
-        }
-        else if (updatedAtTo) {
-            whereAnd = {
-                ...whereAnd,
-                updatedAt: (0, typeorm_1.LessThanOrEqual)(updatedAtTo),
-            };
-            whereOr = [...whereOr, { updatedAt: (0, typeorm_1.LessThanOrEqual)(updatedAtTo) }];
-        }
+        fromToMap.forEach((item, key) => {
+            if (item.fromFieldValue && item.toFieldValue) {
+                whereAnd = {
+                    ...whereAnd,
+                    [key]: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(item.fromFieldValue), (0, typeorm_1.LessThanOrEqual)(item.toFieldValue)),
+                };
+                whereOr = [
+                    ...whereOr,
+                    { [key]: (0, typeorm_1.And)((0, typeorm_1.MoreThanOrEqual)(item.fromFieldValue), (0, typeorm_1.LessThanOrEqual)(item.toFieldValue)) },
+                ];
+            }
+            else if (item.fromFieldValue) {
+                whereAnd = {
+                    ...whereAnd,
+                    [key]: (0, typeorm_1.MoreThanOrEqual)(item.fromFieldValue),
+                };
+                whereOr = [...whereOr, { [key]: (0, typeorm_1.MoreThanOrEqual)(item.fromFieldValue) }];
+            }
+            else if (item.toFieldValue) {
+                whereAnd = {
+                    ...whereAnd,
+                    [key]: (0, typeorm_1.LessThanOrEqual)(item.toFieldValue),
+                };
+                whereOr = [...whereOr, { [key]: (0, typeorm_1.LessThanOrEqual)(item.toFieldValue) }];
+            }
+        });
         if (filterType === 'and')
             queryData.where = whereAnd;
         else if (filterType === 'or')
